@@ -1,0 +1,47 @@
+
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'application'
+}
+
+
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+    maven { url "https://jitpack.io" }
+    maven {
+        url "https://maven.google.com" // Google's Maven repository
+    }
+}
+
+
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation 'io.github.seik.kotlin-telegram-bot:telegram:0.3.7'
+    implementation 'com.google.firebase:firebase-admin:6.8.1'
+}
+
+sourceSets {
+    main.kotlin.srcDirs += 'src/main/kotlin'
+}
+
+mainClassName = 'telegram.MainKt'
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'telegram.MainKt'
+    }
+
+
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
