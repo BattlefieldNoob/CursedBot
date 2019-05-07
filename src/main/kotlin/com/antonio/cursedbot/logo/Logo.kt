@@ -1,4 +1,4 @@
-package logo
+package com.antonio.cursedbot.logo
 
 import kotlinx.css.Display
 import kotlinx.css.Position
@@ -29,8 +29,8 @@ fun RBuilder.logo(height: Int = 100) {
             display = Display.inlineBlock
         }
         attrs.jsStyle.height = height
-        //img(alt = "React logo.logo", src = reactLogo as? String, classes = "Logo-react") {}
-        styledImg(alt = "React logo.logo", src = reactLogo as? String) {
+        //img(alt = "React com.antonio.cursedbot.logo.com.antonio.cursedbot.logo", src = reactLogo as? String, classes = "Logo-react") {}
+        styledImg(alt = "React com.antonio.cursedbot.logo.com.antonio.cursedbot.logo", src = reactLogo as? String) {
             css {
                 //animation(handler = LogoSpin.wrapper,duration= 10.s, delay = 5.s)
                 animation(duration = 10.s,timing = linear,iterationCount = 100.times){
@@ -54,7 +54,7 @@ fun RBuilder.logo(height: Int = 100) {
         }
 
 
-        styledImg(alt = "Kotlin logo.logo", src = kotlinLogo as? String) {
+        styledImg(alt = "Kotlin com.antonio.cursedbot.logo.com.antonio.cursedbot.logo", src = kotlinLogo as? String) {
             css {
                 opacity = 0
                 //animation(handler = LogoSpin.wrapper,duration= 10.s, delay = 5.s)

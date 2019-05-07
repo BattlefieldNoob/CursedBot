@@ -1,12 +1,8 @@
-package com.example
+package com.antonio.cursedbot
 
-import app.app
+import com.antonio.cursedbot.app.app
 import kotlinext.js.requireAll
-import kotlinx.css.TextAlign
-import kotlinx.css.margin
-import kotlinx.css.padding
-import kotlinx.css.px
-import react.dom.div
+import kotlinx.css.*
 import react.dom.render
 import styled.css
 import styled.styledDiv
@@ -22,15 +18,7 @@ fun main(args: Array<String>) {
             console.log("DOM FOUND")
             requireAll(kotlinext.js.require.context("kotlin", true, js("/\\.css$/")))
             render(document.getElementById("kvapp")) {
-                styledDiv{
-                    css {
-                        margin(0.px)
-                        padding(0.px)
-                        fontFamily="sans-serif"
-                        textAlign= TextAlign.center
-                    }
-                    app()
-                }
+               app()
             }
         })
     }
