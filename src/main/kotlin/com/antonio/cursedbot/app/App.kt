@@ -6,19 +6,20 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.json
 import com.antonio.cursedbot.logo.logo
+import kotlinx.coroutines.await
 import react.*
 import react.dom.div
 import react.dom.h2
 import kotlinx.css.*
 import styled.*
-
-
-@JsModule("db.json")
-@JsNonModule
-external val db: dynamic
+import kotlin.js.Promise
+import kotlin.random.Random
 
 interface AppState : RState {
+    var clientt:Any
     var highscore: MutableList<String>
+    var firstid:String
+    var secondid:String
 }
 
 class App : RComponent<RProps, AppState>() {
@@ -41,28 +42,75 @@ class App : RComponent<RProps, AppState>() {
 
 
     suspend fun GetHighScore(){
-        /*val firebase=kotlinext.js.require("firebase")
+        val firebase=kotlinext.js.require("firebase")
 
         firebase.initializeApp(config)
 
-        firebase.database().ref("photos").limitToLast(10).once("value"){
+        val TelegramClient=kotlinext.js.require("messaging-api-telegram").TelegramClient
+
+        val client = TelegramClient.connect("727995564:AAGnvmbhmIpyBCXecDtmSg1CqRzyAWg4xEA")
+
+        val highscores= mutableListOf<String>()
+        firebase.database().ref("photos").limitToLast(5).once("value"){
             data->
             val snap = js("data.val()")
             //console.log(snap)
-            val tmp= mutableListOf(*Object.keys(snap))
+            highscores.addAll(Object.keys(snap))
 
-            setState{
-                highscore=tmp
+            var index = -1
+
+            firebase.database().ref("photos").orderByChild("index").limitToLast(1).once("value"){ data ->
+
+                        val snap = js("data.val()")
+                        console.log(snap)
+                        console.log(snap[Object.keys(snap)[0]]["index"])
+                        val maxIndex = snap[Object.keys(snap)[0]]["index"]
+                        var first=Random.nextInt(maxIndex)
+                var secondPhoto = Random.nextInt(maxIndex)
+
+                while (secondPhoto == first) {
+
+                    secondPhoto = Random.nextInt(maxIndex)
+                }
+
+                firebase.database().ref("photos").orderByChild("index").equalTo(first).once("value"){ datafirst->
+                    firebase.database().ref("photos").orderByChild("index").equalTo(secondPhoto).once("value"){
+                        datasecond->
+                        val datafirst1=datafirst
+                        val snapfirst = js("datafirst1.val()")
+                        val snapsecond = js("datasecond.val()")
+                        val idFirst=Object.keys(snapfirst)[0]
+                        val idSecond=Object.keys(snapsecond)[0]
+
+                        GlobalScope.launch {
+                            val link = (client.getFileLink(idFirst) as Promise<dynamic>).await()
+                            val link1 = (client.getFileLink(idSecond) as Promise<dynamic>).await()
+                            val telegramclient=client
+                            setState{
+                                clientt=telegramclient
+                                highscore=highscores
+                                firstid=link
+                                secondid=link1
+                            }
+                        }
+
+
+
+                    }
+                }
             }
-        }*/
-        console.log(db.photos)
+        }
+
+
+
+        /*console.log(db.photos)
 
         val tmp= mutableListOf(*Object.keys(db.photos))
 
 
         setState{
             highscore=tmp.take(3).toMutableList()
-        }
+        }*/
     }
 
     override fun RBuilder.render() {
@@ -121,21 +169,21 @@ class App : RComponent<RProps, AppState>() {
                         justifyContent=JustifyContent.spaceEvenly
                     }
 
-                    styledDiv {
+                    styledImg(src = state.firstid) {
                         css{
-                            backgroundColor= Color.black
                             height=35.em
                             width=35.em
                             margin(1.em)
+                            objectFit=ObjectFit.contain
                         }
                     }
 
-                    styledDiv {
+                    styledImg(src = state.secondid)  {
                         css{
-                            backgroundColor= Color.black
                             height=35.em
                             width=35.em
                             margin(1.em)
+                            objectFit=ObjectFit.contain
                         }
                     }
                 }
@@ -151,7 +199,7 @@ class App : RComponent<RProps, AppState>() {
 
                     if(state.highscore!=null) {
                         div("Bing") {
-                            highscore(state.highscore)
+                            highscore(state.highscore,state.clientt)
                         }
                     }
                 }

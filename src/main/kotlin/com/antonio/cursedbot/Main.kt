@@ -15,7 +15,6 @@ fun main(args: Array<String>) {
         console.log("DOM Exist")
     } else {
         document.addEventListener("DOMContentLoaded", {
-            console.log("DOM FOUND")
             requireAll(kotlinext.js.require.context("kotlin", true, js("/\\.css$/")))
             render(document.getElementById("kvapp")) {
                app()

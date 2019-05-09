@@ -17,6 +17,7 @@ import kotlin.js.Promise
 
 interface HighscoreProps : RProps{
     var toptenProps: List<String>
+    var client:dynamic
 }
 
 interface HighscoreState : RState {
@@ -35,21 +36,17 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
 
     suspend fun telegramRequest(){
 
-        /*
-        val TelegramClient=kotlinext.js.require("messaging-api-telegram").TelegramClient
 
-        val client = TelegramClient.connect("727995564:AAGnvmbhmIpyBCXecDtmSg1CqRzyAWg4xEA")
 
-        val user=(client.getMe() as Promise<dynamic>).await()
+        //val user=(client.getMe() as Promise<dynamic>).await()
 
-        console.log("MyID ${user.id}")
+        //console.log("MyID ${user.id}")
 
-         */
-        val tmp= mutableListOf<String>()
+        val tmp = mutableListOf<String>()
 
         for (file_id in props.toptenProps) {
-            //val link=(client.getFileLink(file_id) as Promise<dynamic>).await()
-            val link=file_id
+            val link=(props.client.getFileLink(file_id) as Promise<dynamic>).await()
+            //val link=file_id
             console.log(link)
             tmp.add(link)
         }
@@ -104,11 +101,11 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
                                         display=Display.inlineFlex
 
                                     }
-                                    styledDiv {
+                                    styledImg(src = imglink){
                                         css{
-                                            backgroundColor= Color.black
                                             height=13.em
                                             width=13.em
+                                            objectFit=ObjectFit.contain
                                             margin(1.em)
                                         }
                                     }
@@ -122,7 +119,7 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
                                             fontSize=8.pt
                                             alignSelf = Align.center
                                         }
-                                        + "Fist Place"
+                                        + "First Place"
                                     }
                                 }
 
@@ -139,6 +136,7 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
 }
 
 
-fun RBuilder.highscore(topTen: List<String>) = child(Highscore::class) {
+fun RBuilder.highscore(topTen: List<String>, client:Any) = child(Highscore::class) {
     attrs.toptenProps=topTen
+    attrs.client=client
 }
