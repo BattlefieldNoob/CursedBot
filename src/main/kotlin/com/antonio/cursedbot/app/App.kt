@@ -6,6 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.json
 import com.antonio.cursedbot.logo.logo
+import com.antonio.cursedbot.voting.vote
 import kotlinx.coroutines.await
 import react.*
 import react.dom.div
@@ -16,10 +17,8 @@ import kotlin.js.Promise
 import kotlin.random.Random
 
 interface AppState : RState {
-    var clientt:Any
-    var highscore: MutableList<String>
-    var firstid:String
-    var secondid:String
+    var fbPhotosRef:dynamic
+    var telegramClient: dynamic
 }
 
 class App : RComponent<RProps, AppState>() {
@@ -36,81 +35,24 @@ class App : RComponent<RProps, AppState>() {
 
     override fun componentWillMount() {
         GlobalScope.launch {
-            GetHighScore()
+            InitializeClients()
         }
     }
 
 
-    suspend fun GetHighScore(){
-        val firebase=kotlinext.js.require("firebase")
-
+    fun InitializeClients(){
+        val firebase = kotlinext.js.require("firebase")
         firebase.initializeApp(config)
+        val firebaseref = firebase.database().ref("photos")
 
-        val TelegramClient=kotlinext.js.require("messaging-api-telegram").TelegramClient
+        val TelegramClient = kotlinext.js.require("messaging-api-telegram").TelegramClient
 
-        val client = TelegramClient.connect("727995564:AAGnvmbhmIpyBCXecDtmSg1CqRzyAWg4xEA")
+        val telegramclient = TelegramClient.connect("727995564:AAGnvmbhmIpyBCXecDtmSg1CqRzyAWg4xEA")
 
-        val highscores= mutableListOf<String>()
-        firebase.database().ref("photos").limitToLast(5).once("value"){
-            data->
-            val snap = js("data.val()")
-            //console.log(snap)
-            highscores.addAll(Object.keys(snap))
-
-            var index = -1
-
-            firebase.database().ref("photos").orderByChild("index").limitToLast(1).once("value"){ data ->
-
-                        val snap = js("data.val()")
-                        console.log(snap)
-                        console.log(snap[Object.keys(snap)[0]]["index"])
-                        val maxIndex = snap[Object.keys(snap)[0]]["index"]
-                        var first=Random.nextInt(maxIndex)
-                var secondPhoto = Random.nextInt(maxIndex)
-
-                while (secondPhoto == first) {
-
-                    secondPhoto = Random.nextInt(maxIndex)
-                }
-
-                firebase.database().ref("photos").orderByChild("index").equalTo(first).once("value"){ datafirst->
-                    firebase.database().ref("photos").orderByChild("index").equalTo(secondPhoto).once("value"){
-                        datasecond->
-                        val datafirst1=datafirst
-                        val snapfirst = js("datafirst1.val()")
-                        val snapsecond = js("datasecond.val()")
-                        val idFirst=Object.keys(snapfirst)[0]
-                        val idSecond=Object.keys(snapsecond)[0]
-
-                        GlobalScope.launch {
-                            val link = (client.getFileLink(idFirst) as Promise<dynamic>).await()
-                            val link1 = (client.getFileLink(idSecond) as Promise<dynamic>).await()
-                            val telegramclient=client
-                            setState{
-                                clientt=telegramclient
-                                highscore=highscores
-                                firstid=link
-                                secondid=link1
-                            }
-                        }
-
-
-
-                    }
-                }
-            }
+        setState {
+            fbPhotosRef=firebaseref
+            telegramClient=telegramclient
         }
-
-
-
-        /*console.log(db.photos)
-
-        val tmp= mutableListOf(*Object.keys(db.photos))
-
-
-        setState{
-            highscore=tmp.take(3).toMutableList()
-        }*/
     }
 
     override fun RBuilder.render() {
@@ -122,25 +64,25 @@ class App : RComponent<RProps, AppState>() {
                 fontFamily = "sans-serif"
                 textAlign = TextAlign.center
                 height = LinearDimension.fillAvailable
-                display=Display.flex
-                flexDirection=FlexDirection.column
+                display = Display.flex
+                flexDirection = FlexDirection.column
             }
 
 
             styledHeader {
                 css {
                     backgroundColor = Color.chocolate
-                    flex(1.0,1.0)
-                    borderRadius=10.px
+                    flex(1.0, 1.0)
+                    borderRadius = 10.px
                     margin(8.px)
-                    minHeight=10.em
+                    minHeight = 10.em
                 }
 
                 styledDiv {
                     css {
                         backgroundColor = Color.black
                         color = Color.white
-                        height=100.pct
+                        height = 100.pct
                     }
                     logo()
                     h2 {
@@ -152,9 +94,9 @@ class App : RComponent<RProps, AppState>() {
             styledDiv {
 
                 css {
-                    flex(3.0,3.0)
-                    display=Display.flex
-                    flexDirection=FlexDirection.row
+                    flex(3.0, 3.0)
+                    display = Display.flex
+                    flexDirection = FlexDirection.row
                 }
 
                 styledSection {
@@ -163,27 +105,15 @@ class App : RComponent<RProps, AppState>() {
                         flex(1.0, 1.0)
                         borderRadius = 10.px
                         margin(8.px)
-                        display=Display.flex
-                        flexDirection=FlexDirection.row
-                        alignItems=Align.center
-                        justifyContent=JustifyContent.spaceEvenly
+                        display = Display.flex
+                        flexDirection = FlexDirection.row
+                        alignItems = Align.center
+                        justifyContent = JustifyContent.spaceEvenly
                     }
 
-                    styledImg(src = state.firstid) {
-                        css{
-                            height=35.em
-                            width=35.em
-                            margin(1.em)
-                            objectFit=ObjectFit.contain
-                        }
-                    }
-
-                    styledImg(src = state.secondid)  {
-                        css{
-                            height=35.em
-                            width=35.em
-                            margin(1.em)
-                            objectFit=ObjectFit.contain
+                    if (state.fbPhotosRef != null && state.telegramClient != null){
+                        div {
+                            vote(state)
                         }
                     }
                 }
@@ -192,14 +122,14 @@ class App : RComponent<RProps, AppState>() {
                     css {
                         backgroundColor = Color.aliceBlue
                         flex(1.0, 1.0)
-                        maxWidth=35.em
+                        maxWidth = 35.em
                         borderRadius = 10.px
                         margin(8.px)
                     }
 
-                    if(state.highscore!=null) {
-                        div("Bing") {
-                            highscore(state.highscore,state.clientt)
+                    if (state.fbPhotosRef != null && state.telegramClient != null) {
+                        div {
+                            highscore(state)
                         }
                     }
                 }
@@ -208,27 +138,13 @@ class App : RComponent<RProps, AppState>() {
             styledFooter {
                 css {
                     backgroundColor = Color.yellowGreen
-                    flex(1.0,1.0)
-                    borderRadius=10.px
+                    flex(1.0, 1.0)
+                    borderRadius = 10.px
                     margin(8.px)
-                    minHeight=10.em
+                    minHeight = 10.em
                 }
             }
         }
-        /*styledDiv {
-            css{
-                flex(1.0)
-                backgroundColor= Color.aqua
-            }
-
-            styledSection {
-                css {
-                    backgroundColor=Color.coral
-                    float=Float.left
-                }
-            }
-
-        }*/
     }
 }
 

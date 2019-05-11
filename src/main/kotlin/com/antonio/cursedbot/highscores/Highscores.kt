@@ -1,27 +1,28 @@
 package com.antonio.cursedbot.highscores
 
+import com.antonio.cursedbot.app.AppState
+import kotlinext.js.Object
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 import kotlinx.css.*
+import kotlinx.css.properties.scale
+import kotlinx.css.properties.transform
 import react.*
-import react.dom.div
-import react.dom.img
 import react.dom.li
-import react.dom.ol
 import styled.css
 import styled.styledDiv
 import styled.styledImg
 import styled.styledOl
 import kotlin.js.Promise
+import kotlin.random.Random
 
 interface HighscoreProps : RProps{
-    var toptenProps: List<String>
-    var client:dynamic
+    var appState:AppState
 }
 
 interface HighscoreState : RState {
-    var toptenImgLink: MutableList<String>
+    var topImgLink: List<String>
 }
 
 class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreState>(props) {
@@ -29,34 +30,31 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
 
     override fun componentWillMount() {
         GlobalScope.launch {
-            telegramRequest()
+            val top5FileIds=GetHighscoreFileIds()
+            val urls=getUrlfromFileIds(top5FileIds)
+            setState{
+                topImgLink=urls
+            }
         }
     }
 
-
-    suspend fun telegramRequest(){
-
-
-
-        //val user=(client.getMe() as Promise<dynamic>).await()
-
-        //console.log("MyID ${user.id}")
-
-        val tmp = mutableListOf<String>()
-
-        for (file_id in props.toptenProps) {
-            val link=(props.client.getFileLink(file_id) as Promise<dynamic>).await()
-            //val link=file_id
-            console.log(link)
-            tmp.add(link)
+    suspend fun getUrlfromFileIds(fileIds:List<String>):List<String>{
+        val urls= mutableListOf<String>()
+        fileIds.forEach {
+            val link = (props.appState.telegramClient.getFileLink(it) as Promise<dynamic>).await()
+            urls.add(link)
         }
-
-        setState {
-            toptenImgLink=tmp
-        }
-
+        return urls.toList()
     }
 
+    suspend fun GetHighscoreFileIds():List<String> {
+        val top5 = (props.appState.fbPhotosRef.orderByChild("score").limitToLast(5).once("value") as Promise<dynamic>).await()
+
+        val snap = js("top5.val()")
+        console.log(snap)
+        //console.log(snap)
+        return listOf(*Object.keys(snap))
+    }
     override fun RBuilder.render() {
 
         styledDiv {
@@ -69,15 +67,6 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
                 flex(1.0)
             }
 
-            /*styledDiv {
-                css {
-                    width = 10.px
-                    height = 90.pct
-                    backgroundColor = Color.gray
-                    flex(1.0)
-                }
-            }*/
-
             styledDiv {
                 css {
                     flex(1.0,1.0)
@@ -88,9 +77,9 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
                         listStyleType=ListStyleType.none
                         padding(0.px)
                     }
-                    if(state.toptenImgLink!=null){
+                    if(state.topImgLink!=null){
                         li {
-                            for (imglink in state.toptenImgLink) {
+                            for (imglink in state.topImgLink) {
                                 styledDiv {
                                     css{
                                         height=15.em
@@ -99,7 +88,6 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
                                         flex(1.0)
                                         flexDirection=FlexDirection.row
                                         display=Display.inlineFlex
-
                                     }
                                     styledImg(src = imglink){
                                         css{
@@ -122,21 +110,16 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
                                         + "First Place"
                                     }
                                 }
-
                             }
                         }
                     }
                 }
             }
-
         }
-
-
     }
 }
 
 
-fun RBuilder.highscore(topTen: List<String>, client:Any) = child(Highscore::class) {
-    attrs.toptenProps=topTen
-    attrs.client=client
+fun RBuilder.highscore(appState: AppState) = child(Highscore::class) {
+    attrs.appState=appState
 }
