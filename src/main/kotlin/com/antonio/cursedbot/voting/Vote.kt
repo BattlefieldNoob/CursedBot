@@ -2,6 +2,7 @@ package com.antonio.cursedbot.voting
 
 import com.antonio.cursedbot.app.AppState
 import kotlinext.js.Object
+import kotlinext.js.asJsObject
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
@@ -13,6 +14,7 @@ import react.*
 import react.dom.div
 import styled.StyleSheet
 import styled.css
+import styled.styledDiv
 import styled.styledImg
 import kotlin.js.Promise
 import kotlin.random.Random
@@ -26,6 +28,7 @@ interface VoteState : RState {
     var votingFileIds: List<String>
     var votingUrls: List<String>
     var isValid: Boolean
+    var voted:Boolean
 }
 
 class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
@@ -39,13 +42,16 @@ class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
             width = 35.em
             margin(1.em)
             transform.rotateY(0.deg)
+            put("transform-origin","center center")
+            opacity=100
 
             objectFit = ObjectFit.contain
-            hover {
+            /*hover {
                 transform {
-                    scale(1.2)
+                    scale(1.05)
+
                 }
-            }
+            }*/
 
             transition(duration = 0.5.s)
         }
@@ -53,7 +59,14 @@ class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
 
     object clicked : StyleSheet("clicked") {
         val wrapper by  css {
+            put("transform-origin","top left")
             transform.rotateY(90.deg)
+            opacity=0
+            /*hover {
+                transform {
+                    scale(1)
+                }
+            }*/
         }
     }
 
@@ -71,6 +84,7 @@ class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
         setState {
             votingFileIds = fileIds
             votingUrls = urls
+            voted=false
         }
     }
 
@@ -164,6 +178,9 @@ class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
                 second=styledImg(src = state.votingUrls[1]) {
                     css {
                         +base.wrapper
+                        if(state.voted){
+                            +clicked.wrapper
+                        }
                     }
                     attrs {
                         onClickFunction = {

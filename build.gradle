@@ -84,11 +84,8 @@ kotlinFrontend {
         dependency 'react-dom'
         dependency 'uglifyjs-webpack-plugin'
         dependency "inline-style-prefixer"
-        dependency "free-google-image-search"
-        dependency "google-images"
         dependency "url-loader"
         dependency "botbuilder"
-        dependency "ts2kt"
         dependency "messaging-api-telegram"
         dependency "firebase"
         dependency("styled-components","^3.4.10")

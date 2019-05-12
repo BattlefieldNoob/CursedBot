@@ -1,7 +1,6 @@
 package com.antonio.cursedbot.app
 
 import com.antonio.cursedbot.highscores.highscore
-import kotlinext.js.Object
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.json
@@ -13,8 +12,6 @@ import react.dom.div
 import react.dom.h2
 import kotlinx.css.*
 import styled.*
-import kotlin.js.Promise
-import kotlin.random.Random
 
 interface AppState : RState {
     var fbPhotosRef:dynamic
@@ -112,9 +109,7 @@ class App : RComponent<RProps, AppState>() {
                     }
 
                     if (state.fbPhotosRef != null && state.telegramClient != null){
-                        div {
-                            vote(state)
-                        }
+                        vote(state)
                     }
                 }
 
