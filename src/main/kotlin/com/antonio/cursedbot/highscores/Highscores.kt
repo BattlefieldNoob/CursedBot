@@ -8,14 +8,22 @@ import kotlinx.coroutines.launch
 import kotlinx.css.*
 import kotlinx.css.properties.scale
 import kotlinx.css.properties.transform
+import kotlinx.html.*
+import kotlinx.html.DIV
 import react.*
+import react.dom.RDOMBuilder
+import react.dom.div
 import react.dom.li
+import react.dom.tag
 import styled.css
 import styled.styledDiv
 import styled.styledImg
 import styled.styledOl
 import kotlin.js.Promise
 import kotlin.random.Random
+
+
+
 
 interface HighscoreProps : RProps{
     var appState:AppState
@@ -24,6 +32,8 @@ interface HighscoreProps : RProps{
 interface HighscoreState : RState {
     var topImgLink: List<String>
 }
+
+fun RBuilder.flipMove(handler: RHandler<dynamic>) = child(FlipMove::class,handler)
 
 class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreState>(props) {
 
@@ -65,6 +75,9 @@ class Highscore(props: HighscoreProps) : RComponent<HighscoreProps, HighscoreSta
                 display=Display.inlineFlex
                 backgroundColor=Color.green
                 flex(1.0)
+            }
+            flipMove {
+
             }
 
             styledDiv {

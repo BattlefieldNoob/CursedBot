@@ -42,11 +42,10 @@ class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
             width = 35.em
             margin(1.em)
             transform.rotateY(0.deg)
-            put("transform-origin","center center")
             opacity=100
 
             objectFit = ObjectFit.contain
-            /*hover {
+           /* hover {
                 transform {
                     scale(1.05)
 
@@ -57,9 +56,18 @@ class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
         }
     }
 
+    object hover:StyleSheet("hover"){
+        val wrapper by css{
+            hover {
+                transform {
+                    scale(1.05)
+                }
+            }
+        }
+    }
+
     object clicked : StyleSheet("clicked") {
         val wrapper by  css {
-            put("transform-origin","top left")
             transform.rotateY(90.deg)
             opacity=0
             /*hover {
@@ -166,10 +174,18 @@ class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
                 first=styledImg(src = state.votingUrls[0]) {
                     css {
                         +base.wrapper
+                        if(state.voted){
+                            +clicked.wrapper
+                        }else{
+                            +hover.wrapper
+                        }
                     }
                     attrs {
                         onClickFunction = {
                             voteFor(0)
+                            setState {
+                                voted=true
+                            }
                         }
                     }
 
@@ -180,12 +196,18 @@ class Vote(props: VoteProps) : RComponent<VoteProps, VoteState>(props) {
                         +base.wrapper
                         if(state.voted){
                             +clicked.wrapper
+                        }else{
+                            +hover.wrapper
                         }
                     }
                     attrs {
                         onClickFunction = {
                             voteFor(1)
+                            setState {
+                                voted=true
+                            }
                         }
+
                     }
                 }
             }
